@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AP Exam Countdown</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --border: rgba(255,255,255,0.06);
+    --text: #e8e8ed;
+    --text-dim: #6b6b7b;
+    --stat-accent: #f59e0b;
+    --stat-glow: rgba(245,158,11,0.15);
+    --csa-accent: #06b6d4;
+    --csa-glow: rgba(6,182,212,0.15);
+    --phys-accent: #ef4444;
+    --phys-glow: rgba(239,68,68,0.15);
+    --calc-accent: #8b5cf6;
+    --calc-glow: rgba(139,92,246,0.15);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* Ambient glow blobs */
+  .ambient {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .ambient-1 { width: 500px; height: 500px; background: var(--stat-accent); top: -150px; left: -100px; }
+  .ambient-2 { width: 400px; height: 400px; background: var(--calc-accent); bottom: -100px; right: -80px; }
+  .ambient-3 { width: 350px; height: 350px; background: var(--csa-accent); top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.06; }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 56px;
+    animation: fadeUp 0.8s ease-out;
+  }
+
+  .header .tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    padding: 8px 20px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+  }
+
+  .header h1 {
+    font-size: clamp(2.4rem, 6vw, 3.8rem);
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 0%, #999 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header p {
+    margin-top: 12px;
+    color: var(--text-dim);
+    font-size: 15px;
+    font-weight: 400;
+  }
+
+  /* Exam Cards */
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    animation: fadeUp 0.8s ease-out both;
+  }
+  .card:nth-child(1) { animation-delay: 0.1s; }
+  .card:nth-child(2) { animation-delay: 0.2s; }
+  .card:nth-child(3) { animation-delay: 0.3s; }
+  .card:nth-child(4) { animation-delay: 0.4s; }
+
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.1);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+  }
+
+  .card[data-exam="stat"]::before { background: linear-gradient(90deg, transparent, var(--stat-accent), transparent); }
+  .card[data-exam="csa"]::before { background: linear-gradient(90deg, transparent, var(--csa-accent), transparent); }
+  .card[data-exam="phys"]::before { background: linear-gradient(90deg, transparent, var(--phys-accent), transparent); }
+  .card[data-exam="calc"]::before { background: linear-gradient(90deg, transparent, var(--calc-accent), transparent); }
+
+  /* Glow corner */
+  .card .glow {
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.15;
+    pointer-events: none;
+  }
+  .card[data-exam="stat"] .glow { background: var(--stat-accent); }
+  .card[data-exam="csa"] .glow { background: var(--csa-accent); }
+  .card[data-exam="phys"] .glow { background: var(--phys-accent); }
+  .card[data-exam="calc"] .glow { background: var(--calc-accent); }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .exam-name {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .exam-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.04);
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  /* Countdown digits */
+  .countdown {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .unit {
+    text-align: center;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 8px 14px;
+    position: relative;
+  }
+
+  .unit .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+    transition: color 0.3s;
+  }
+
+  .card[data-exam="stat"] .num { color: var(--stat-accent); }
+  .card[data-exam="csa"] .num { color: var(--csa-accent); }
+  .card[data-exam="phys"] .num { color: var(--phys-accent); }
+  .card[data-exam="calc"] .num { color: var(--calc-accent); }
+
+  .unit .label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+  }
+
+  .card[data-exam="stat"] .progress-fill { background: var(--stat-accent); }
+  .card[data-exam="csa"] .progress-fill { background: var(--csa-accent); }
+  .card[data-exam="phys"] .progress-fill { background: var(--phys-accent); }
+  .card[data-exam="calc"] .progress-fill { background: var(--calc-accent); }
+
+  .progress-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    min-width: 42px;
+    text-align: right;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    margin-top: 48px;
+    color: var(--text-dim);
+    font-size: 13px;
+    animation: fadeUp 0.8s ease-out 0.5s both;
+  }
+
+  .footer .live-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: #22c55e;
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse 2s ease-in-out infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  @media (max-width: 500px) {
+    .container { padding: 40px 16px 60px; }
+    .card { padding: 24px 20px; }
+    .countdown { gap: 8px; }
+    .unit { padding: 14px 4px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ambient ambient-1"></div>
+<div class="ambient ambient-2"></div>
+<div class="ambient ambient-3"></div>
+
+<div class="container">
+  <div class="header">
+    <div class="tag">May 2026</div>
+    <h1>AP Exam Countdown</h1>
+    <p>Every second counts. Stay locked in.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card" data-exam="stat" data-target="2026-05-07T12:00:00+03:00" data-start="2025-09-01">
+      <div class="glow"></div>
+      <div class="card-top">
+        <div class="exam-name">AP Statistics</div>
+        <div class="exam-date">THU, MAY 7 · 12:00 PM</div>
+      </div>
+      <div class="countdown">
+        <div class="unit"><div class="num" data-months>--</div><div class="label">Months</div></div>
+        <div class="unit"><div class="num" data-days>--</div><div class="label">Days</div></div>
+        <div class="unit"><div class="num" data-hours>--</div><div class="label">Hours</div></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+        <div class="progress-pct">--%</div>
+      </div>
+    </div>
+
+    <div class="card" data-exam="calc" data-target="2026-05-11T08:00:00+03:00" data-start="2025-09-01">
+      <div class="glow"></div>
+      <div class="card-top">
+        <div class="exam-name">AP Calculus BC</div>
+        <div class="exam-date">MON, MAY 11 · 8:00 AM</div>
+      </div>
+      <div class="countdown">
+        <div class="unit"><div class="num" data-months>--</div><div class="label">Months</div></div>
+        <div class="unit"><div class="num" data-days>--</div><div class="label">Days</div></div>
+        <div class="unit"><div class="num" data-hours>--</div><div class="label">Hours</div></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+        <div class="progress-pct">--%</div>
+      </div>
+    </div>
+
+    <div class="card" data-exam="phys" data-target="2026-05-13T12:00:00+03:00" data-start="2025-09-01">
+      <div class="glow"></div>
+      <div class="card-top">
+        <div class="exam-name">AP Physics C: Mechanics</div>
+        <div class="exam-date">WED, MAY 13 · 12:00 PM</div>
+      </div>
+      <div class="countdown">
+        <div class="unit"><div class="num" data-months>--</div><div class="label">Months</div></div>
+        <div class="unit"><div class="num" data-days>--</div><div class="label">Days</div></div>
+        <div class="unit"><div class="num" data-hours>--</div><div class="label">Hours</div></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+        <div class="progress-pct">--%</div>
+      </div>
+    </div>
+
+    <div class="card" data-exam="csa" data-target="2026-05-15T12:00:00+03:00" data-start="2025-09-01">
+      <div class="glow"></div>
+      <div class="card-top">
+        <div class="exam-name">AP Computer Science A</div>
+        <div class="exam-date">FRI, MAY 15 · 12:00 PM</div>
+      </div>
+      <div class="countdown">
+        <div class="unit"><div class="num" data-months>--</div><div class="label">Months</div></div>
+        <div class="unit"><div class="num" data-days>--</div><div class="label">Days</div></div>
+        <div class="unit"><div class="num" data-hours>--</div><div class="label">Hours</div></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+        <div class="progress-pct">--%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span class="live-dot"></span> Live · updates every second · times in Turkey (GMT+3)
+  </div>
+</div>
+
+<script>
+  const cards = document.querySelectorAll('.card');
+
+  function update() {
+    const now = new Date();
+
+    cards.forEach(card => {
+      const target = new Date(card.dataset.target);
+      const start = new Date(card.dataset.start);
+      let diff = target - now;
+
+      if (diff <= 0) {
+        card.querySelector('[data-months]').textContent = '0';
+        card.querySelector('[data-days]').textContent = '0';
+        card.querySelector('[data-hours]').textContent = '0';
+        card.querySelector('.progress-fill').style.width = '100%';
+        card.querySelector('.progress-pct').textContent = '100%';
+        return;
+      }
+
+      // Calculate months + remaining
+      const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const months = Math.floor(totalDays / 30);
+      const days = totalDays % 30;
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+      card.querySelector('[data-months]').textContent = months;
+      card.querySelector('[data-days]').textContent = days;
+      card.querySelector('[data-hours]').textContent = hours;
+
+      // Progress: how much of the school year has elapsed
+      const totalSpan = target - start;
+      const elapsed = now - start;
+      const pct = Math.min(100, Math.max(0, (elapsed / totalSpan) * 100));
+      card.querySelector('.progress-fill').style.width = pct.toFixed(1) + '%';
+      card.querySelector('.progress-pct').textContent = pct.toFixed(0) + '%';
+    });
+  }
+
+  update();
+  setInterval(update, 1000);
+</script>
+</body>
+</html>
