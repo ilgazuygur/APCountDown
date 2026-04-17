@@ -15,13 +15,9 @@
     --text: #e8e8ed;
     --text-dim: #6b6b7b;
     --stat-accent: #f59e0b;
-    --stat-glow: rgba(245,158,11,0.15);
     --csa-accent: #06b6d4;
-    --csa-glow: rgba(6,182,212,0.15);
     --phys-accent: #ef4444;
-    --phys-glow: rgba(239,68,68,0.15);
     --calc-accent: #8b5cf6;
-    --calc-glow: rgba(139,92,246,0.15);
   }
 
   body {
@@ -32,7 +28,6 @@
     overflow-x: hidden;
   }
 
-  /* Grain overlay */
   body::before {
     content: '';
     position: fixed;
@@ -42,7 +37,6 @@
     z-index: 100;
   }
 
-  /* Ambient glow blobs */
   .ambient {
     position: fixed;
     border-radius: 50%;
@@ -63,7 +57,6 @@
     padding: 60px 24px 80px;
   }
 
-  /* Header */
   .header {
     text-align: center;
     margin-bottom: 56px;
@@ -103,7 +96,6 @@
     font-weight: 400;
   }
 
-  /* Exam Cards */
   .cards {
     display: flex;
     flex-direction: column;
@@ -114,9 +106,8 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 20px;
-    padding: 32px;
-    position: relative;
     overflow: hidden;
+    position: relative;
     transition: transform 0.3s ease, border-color 0.3s ease;
     animation: fadeUp 0.8s ease-out both;
   }
@@ -125,39 +116,33 @@
   .card:nth-child(3) { animation-delay: 0.3s; }
   .card:nth-child(4) { animation-delay: 0.4s; }
 
-  .card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(255,255,255,0.1);
-  }
+  .card:hover { border-color: rgba(255,255,255,0.1); }
 
   .card::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     height: 1px;
+    z-index: 2;
   }
-
   .card[data-exam="stat"]::before { background: linear-gradient(90deg, transparent, var(--stat-accent), transparent); }
-  .card[data-exam="csa"]::before { background: linear-gradient(90deg, transparent, var(--csa-accent), transparent); }
+  .card[data-exam="csa"]::before  { background: linear-gradient(90deg, transparent, var(--csa-accent), transparent); }
   .card[data-exam="phys"]::before { background: linear-gradient(90deg, transparent, var(--phys-accent), transparent); }
   .card[data-exam="calc"]::before { background: linear-gradient(90deg, transparent, var(--calc-accent), transparent); }
 
-  /* Glow corner */
+  .card-main { padding: 32px; position: relative; }
+
   .card .glow {
     position: absolute;
-    top: -60px;
-    right: -60px;
-    width: 180px;
-    height: 180px;
+    top: -60px; right: -60px;
+    width: 180px; height: 180px;
     border-radius: 50%;
     filter: blur(60px);
     opacity: 0.15;
     pointer-events: none;
   }
   .card[data-exam="stat"] .glow { background: var(--stat-accent); }
-  .card[data-exam="csa"] .glow { background: var(--csa-accent); }
+  .card[data-exam="csa"]  .glow { background: var(--csa-accent); }
   .card[data-exam="phys"] .glow { background: var(--phys-accent); }
   .card[data-exam="calc"] .glow { background: var(--calc-accent); }
 
@@ -176,7 +161,7 @@
     letter-spacing: -0.5px;
   }
 
-  .exam-date {
+  .exam-date-badge {
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     font-weight: 500;
@@ -187,7 +172,6 @@
     border: 1px solid var(--border);
   }
 
-  /* Countdown digits */
   .countdown {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -200,7 +184,6 @@
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 18px 8px 14px;
-    position: relative;
   }
 
   .unit .num {
@@ -209,11 +192,10 @@
     font-weight: 700;
     line-height: 1;
     margin-bottom: 6px;
-    transition: color 0.3s;
   }
 
   .card[data-exam="stat"] .num { color: var(--stat-accent); }
-  .card[data-exam="csa"] .num { color: var(--csa-accent); }
+  .card[data-exam="csa"]  .num { color: var(--csa-accent); }
   .card[data-exam="phys"] .num { color: var(--phys-accent); }
   .card[data-exam="calc"] .num { color: var(--calc-accent); }
 
@@ -225,7 +207,6 @@
     color: var(--text-dim);
   }
 
-  /* Progress bar */
   .progress-wrap {
     margin-top: 20px;
     display: flex;
@@ -248,7 +229,7 @@
   }
 
   .card[data-exam="stat"] .progress-fill { background: var(--stat-accent); }
-  .card[data-exam="csa"] .progress-fill { background: var(--csa-accent); }
+  .card[data-exam="csa"]  .progress-fill { background: var(--csa-accent); }
   .card[data-exam="phys"] .progress-fill { background: var(--phys-accent); }
   .card[data-exam="calc"] .progress-fill { background: var(--calc-accent); }
 
@@ -258,6 +239,179 @@
     color: var(--text-dim);
     min-width: 42px;
     text-align: right;
+  }
+
+  /* ── Toggle button ── */
+  .toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 20px;
+    padding: 11px 0;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    user-select: none;
+  }
+
+  .toggle-btn:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.12);
+    color: var(--text);
+  }
+
+  .card[data-exam="stat"] .toggle-btn:hover { color: var(--stat-accent); border-color: rgba(245,158,11,0.25); }
+  .card[data-exam="csa"]  .toggle-btn:hover { color: var(--csa-accent);  border-color: rgba(6,182,212,0.25); }
+  .card[data-exam="phys"] .toggle-btn:hover { color: var(--phys-accent); border-color: rgba(239,68,68,0.25); }
+  .card[data-exam="calc"] .toggle-btn:hover { color: var(--calc-accent); border-color: rgba(139,92,246,0.25); }
+
+  .toggle-btn .arrow {
+    display: inline-block;
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    font-size: 13px;
+  }
+
+  .toggle-btn.open .arrow { transform: rotate(180deg); }
+
+  /* ── Format Panel ── */
+  .format-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .format-panel.open { max-height: 900px; }
+
+  .format-inner {
+    border-top: 1px solid var(--border);
+    padding: 24px 32px 28px;
+  }
+
+  .sections-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .section-block {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+
+  .section-block .sh {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: inline-block;
+  }
+
+  .card[data-exam="stat"] .sh-mcq { background: rgba(245,158,11,0.12); color: var(--stat-accent); }
+  .card[data-exam="stat"] .sh-frq { background: rgba(245,158,11,0.07); color: var(--stat-accent); }
+  .card[data-exam="csa"]  .sh-mcq { background: rgba(6,182,212,0.12);  color: var(--csa-accent); }
+  .card[data-exam="csa"]  .sh-frq { background: rgba(6,182,212,0.07);  color: var(--csa-accent); }
+  .card[data-exam="phys"] .sh-mcq { background: rgba(239,68,68,0.12);  color: var(--phys-accent); }
+  .card[data-exam="phys"] .sh-frq { background: rgba(239,68,68,0.07);  color: var(--phys-accent); }
+  .card[data-exam="calc"] .sh-mcq { background: rgba(139,92,246,0.12); color: var(--calc-accent); }
+  .card[data-exam="calc"] .sh-frq { background: rgba(139,92,246,0.07); color: var(--calc-accent); }
+
+  .section-block .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin-bottom: 10px;
+  }
+
+  .section-block .meta span {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .section-block .meta span b {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .section-block .calc-note {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 10px;
+  }
+
+  .calc-yes { background: rgba(34,197,94,0.1); color: #4ade80; }
+  .calc-no  { background: rgba(239,68,68,0.1);  color: #f87171; }
+
+  .q-rows { display: flex; flex-direction: column; gap: 5px; }
+
+  .q-row {
+    display: flex;
+    gap: 10px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--text-dim);
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .q-row:last-child { border-bottom: none; }
+
+  .q-row .qn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+    height: fit-content;
+    margin-top: 1px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .card[data-exam="stat"] .qn { background: rgba(245,158,11,0.1); color: var(--stat-accent); }
+  .card[data-exam="csa"]  .qn { background: rgba(6,182,212,0.1);  color: var(--csa-accent); }
+  .card[data-exam="phys"] .qn { background: rgba(239,68,68,0.1);  color: var(--phys-accent); }
+  .card[data-exam="calc"] .qn { background: rgba(139,92,246,0.1); color: var(--calc-accent); }
+
+  .note-row {
+    font-size: 11px;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-top: 12px;
+    line-height: 1.6;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── subpart chips for calc ── */
+  .sub-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .sub-chip {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
   }
 
   /* Footer */
@@ -271,8 +425,7 @@
 
   .footer .live-dot {
     display: inline-block;
-    width: 6px;
-    height: 6px;
+    width: 6px; height: 6px;
     background: #22c55e;
     border-radius: 50%;
     margin-right: 6px;
@@ -282,19 +435,21 @@
 
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes pulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+    50%       { opacity: 0.3; }
   }
 
-  @media (max-width: 500px) {
+  @media (max-width: 600px) {
     .container { padding: 40px 16px 60px; }
-    .card { padding: 24px 20px; }
+    .card-main { padding: 24px 20px; }
+    .format-inner { padding: 20px; }
     .countdown { gap: 8px; }
     .unit { padding: 14px 4px 10px; }
+    .sections-row { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -312,73 +467,252 @@
   </div>
 
   <div class="cards">
+
+    <!-- AP STATISTICS -->
     <div class="card" data-exam="stat" data-target="2026-05-07T12:00:00+03:00" data-start="2025-09-01">
-      <div class="glow"></div>
-      <div class="card-top">
-        <div class="exam-name">AP Statistics</div>
-        <div class="exam-date">THU, MAY 7 · 12:00 PM</div>
+      <div class="card-main">
+        <div class="glow"></div>
+        <div class="card-top">
+          <div class="exam-name">AP Statistics</div>
+          <div class="exam-date-badge">THU, MAY 7 · 12:00 PM</div>
+        </div>
+        <div class="countdown">
+          <div class="unit"><div class="num" data-months>--</div><div class="label">Months</div></div>
+          <div class="unit"><div class="num" data-days>--</div><div class="label">Days</div></div>
+          <div class="unit"><div class="num" data-hours>--</div><div class="label">Hours</div></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+          <div class="progress-pct">--%</div>
+        </div>
+        <button class="toggle-btn" onclick="toggle(this)">
+          Exam Format <span class="arrow">↓</span>
+        </button>
       </div>
-      <div class="countdown">
-        <div class="unit"><div class="num" data-months>--</div><div class="label">Months</div></div>
-        <div class="unit"><div class="num" data-days>--</div><div class="label">Days</div></div>
-        <div class="unit"><div class="num" data-hours>--</div><div class="label">Hours</div></div>
-      </div>
-      <div class="progress-wrap">
-        <div class="progress-bar"><div class="progress-fill"></div></div>
-        <div class="progress-pct">--%</div>
+      <div class="format-panel">
+        <div class="format-inner">
+          <div class="sections-row">
+            <div class="section-block">
+              <div class="sh sh-mcq">Section I — MCQ</div>
+              <div class="meta">
+                <span><b>40</b> questions</span>
+                <span><b>90</b> min</span>
+                <span><b>50%</b> of score</span>
+              </div>
+              <div class="calc-note calc-yes">✓ TI-84 allowed</div>
+              <div class="q-rows">
+                <div class="q-row"><span class="qn">FORMAT</span><span>Individual questions + question sets sharing a prompt. Formula sheet in Bluebook.</span></div>
+              </div>
+            </div>
+            <div class="section-block">
+              <div class="sh sh-frq">Section II — FRQ</div>
+              <div class="meta">
+                <span><b>6</b> questions</span>
+                <span><b>90</b> min</span>
+                <span><b>50%</b> of score</span>
+              </div>
+              <div class="calc-note calc-yes">✓ TI-84 allowed</div>
+              <div class="q-rows">
+                <div class="q-row"><span class="qn">Part A</span><span>5 short-answer questions</span></div>
+                <div class="q-row"><span class="qn">Part B</span><span>1 investigative task (~25–30 min)</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="q-rows">
+            <div class="q-row"><span class="qn">Q1</span><span>Exploring data — comparing distributions (dotplot, boxplot, histogram)</span></div>
+            <div class="q-row"><span class="qn">Q2</span><span>Probability or sampling distributions</span></div>
+            <div class="q-row"><span class="qn">Q3</span><span>Study design — observational vs experiment, randomization, bias</span></div>
+            <div class="q-row"><span class="qn">Q4</span><span>Inference: confidence interval or significance test (1- or 2-sample)</span></div>
+            <div class="q-row"><span class="qn">Q5</span><span>Inference: chi-square test or regression slope significance test</span></div>
+            <div class="q-row"><span class="qn">Q6</span><span>Investigative task — multi-part, integrates multiple topics in new context</span></div>
+          </div>
+          <div class="note-row">Hybrid digital: MCQ in Bluebook → FRQ handwritten in paper booklet. Calc allowed entire exam.</div>
+        </div>
       </div>
     </div>
 
+    <!-- AP CALCULUS BC -->
     <div class="card" data-exam="calc" data-target="2026-05-11T08:00:00+03:00" data-start="2025-09-01">
-      <div class="glow"></div>
-      <div class="card-top">
-        <div class="exam-name">AP Calculus BC</div>
-        <div class="exam-date">MON, MAY 11 · 8:00 AM</div>
+      <div class="card-main">
+        <div class="glow"></div>
+        <div class="card-top">
+          <div class="exam-name">AP Calculus BC</div>
+          <div class="exam-date-badge">MON, MAY 11 · 8:00 AM</div>
+        </div>
+        <div class="countdown">
+          <div class="unit"><div class="num" data-months>--</div><div class="label">Months</div></div>
+          <div class="unit"><div class="num" data-days>--</div><div class="label">Days</div></div>
+          <div class="unit"><div class="num" data-hours>--</div><div class="label">Hours</div></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+          <div class="progress-pct">--%</div>
+        </div>
+        <button class="toggle-btn" onclick="toggle(this)">
+          Exam Format <span class="arrow">↓</span>
+        </button>
       </div>
-      <div class="countdown">
-        <div class="unit"><div class="num" data-months>--</div><div class="label">Months</div></div>
-        <div class="unit"><div class="num" data-days>--</div><div class="label">Days</div></div>
-        <div class="unit"><div class="num" data-hours>--</div><div class="label">Hours</div></div>
-      </div>
-      <div class="progress-wrap">
-        <div class="progress-bar"><div class="progress-fill"></div></div>
-        <div class="progress-pct">--%</div>
+      <div class="format-panel">
+        <div class="format-inner">
+          <div class="sections-row">
+            <div class="section-block">
+              <div class="sh sh-mcq">Section I — MCQ</div>
+              <div class="meta">
+                <span><b>45</b> questions</span>
+                <span><b>105</b> min</span>
+                <span><b>50%</b> of score</span>
+              </div>
+              <div class="sub-chips">
+                <div class="sub-chip">Part A: 30 Qs · 60 min · NO calc</div>
+                <div class="sub-chip">Part B: 15 Qs · 45 min · calc required</div>
+              </div>
+            </div>
+            <div class="section-block">
+              <div class="sh sh-frq">Section II — FRQ</div>
+              <div class="meta">
+                <span><b>6</b> questions</span>
+                <span><b>90</b> min</span>
+                <span><b>50%</b> of score</span>
+              </div>
+              <div class="sub-chips">
+                <div class="sub-chip">Part A: 2 Qs · 30 min · calc required</div>
+                <div class="sub-chip">Part B: 4 Qs · 60 min · NO calc</div>
+              </div>
+            </div>
+          </div>
+          <div class="q-rows">
+            <div class="q-row"><span class="qn">Q1 — A</span><span>Rate / accumulation or area / volume — use fnInt, solve on calc</span></div>
+            <div class="q-row"><span class="qn">Q2 — A</span><span>Graph / table analysis of f, f ′, f ′′ with calculator</span></div>
+            <div class="q-row"><span class="qn">Q3 — B</span><span>Differential equations — separation of variables, slope field, Euler's method</span></div>
+            <div class="q-row"><span class="qn">Q4 — B</span><span>Parametric / polar / vector or other BC-exclusive topic</span></div>
+            <div class="q-row"><span class="qn">Q5 — B</span><span>Series — convergence tests, Taylor / Maclaurin, error bound</span></div>
+            <div class="q-row"><span class="qn">Q6 — B</span><span>FTC application, pure derivative / integral manipulation</span></div>
+          </div>
+          <div class="note-row">Hybrid digital. Embedded Desmos available in Part B MCQ + Part A FRQ. Part B FRQ: can revisit Part A questions without calc.</div>
+        </div>
       </div>
     </div>
 
+    <!-- AP PHYSICS C MECHANICS -->
     <div class="card" data-exam="phys" data-target="2026-05-13T12:00:00+03:00" data-start="2025-09-01">
-      <div class="glow"></div>
-      <div class="card-top">
-        <div class="exam-name">AP Physics C: Mechanics</div>
-        <div class="exam-date">WED, MAY 13 · 12:00 PM</div>
+      <div class="card-main">
+        <div class="glow"></div>
+        <div class="card-top">
+          <div class="exam-name">AP Physics C: Mechanics</div>
+          <div class="exam-date-badge">WED, MAY 13 · 12:00 PM</div>
+        </div>
+        <div class="countdown">
+          <div class="unit"><div class="num" data-months>--</div><div class="label">Months</div></div>
+          <div class="unit"><div class="num" data-days>--</div><div class="label">Days</div></div>
+          <div class="unit"><div class="num" data-hours>--</div><div class="label">Hours</div></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+          <div class="progress-pct">--%</div>
+        </div>
+        <button class="toggle-btn" onclick="toggle(this)">
+          Exam Format <span class="arrow">↓</span>
+        </button>
       </div>
-      <div class="countdown">
-        <div class="unit"><div class="num" data-months>--</div><div class="label">Months</div></div>
-        <div class="unit"><div class="num" data-days>--</div><div class="label">Days</div></div>
-        <div class="unit"><div class="num" data-hours>--</div><div class="label">Hours</div></div>
-      </div>
-      <div class="progress-wrap">
-        <div class="progress-bar"><div class="progress-fill"></div></div>
-        <div class="progress-pct">--%</div>
+      <div class="format-panel">
+        <div class="format-inner">
+          <div class="sections-row">
+            <div class="section-block">
+              <div class="sh sh-mcq">Section I — MCQ</div>
+              <div class="meta">
+                <span><b>40</b> questions (4-option)</span>
+                <span><b>80</b> min</span>
+                <span><b>50%</b> of score</span>
+              </div>
+              <div class="calc-note calc-no">✗ No calculator</div>
+              <div class="q-rows">
+                <div class="q-row"><span class="qn">FORMAT</span><span>Discrete questions and question sets. Formula sheet in Bluebook.</span></div>
+              </div>
+            </div>
+            <div class="section-block">
+              <div class="sh sh-frq">Section II — FRQ</div>
+              <div class="meta">
+                <span><b>4</b> questions</span>
+                <span><b>100</b> min</span>
+                <span><b>50%</b> of score</span>
+              </div>
+              <div class="calc-note calc-yes">✓ Calculator + ruler allowed</div>
+              <div class="q-rows">
+                <div class="q-row"><span class="qn">NOTE</span><span>One question of each type below</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="q-rows">
+            <div class="q-row"><span class="qn">Q1</span><span>Mathematical routines — multi-step calculus-based derivation (Newton's laws, kinematics, dynamics)</span></div>
+            <div class="q-row"><span class="qn">Q2</span><span>Translation between representations — move between equations, graphs, diagrams, and verbal descriptions</span></div>
+            <div class="q-row"><span class="qn">Q3</span><span>Experimental design and analysis — design a lab, analyze data, evaluate error sources</span></div>
+            <div class="q-row"><span class="qn">Q4</span><span>Qualitative / quantitative translation — explain reasoning in words and connect to math expressions</span></div>
+          </div>
+          <div class="note-row">Begin every derivation from a fundamental principle / equation on the formula sheet. ∫ and d/dt steps must be shown. Hybrid digital — FRQ handwritten.</div>
+        </div>
       </div>
     </div>
 
+    <!-- AP CS A -->
     <div class="card" data-exam="csa" data-target="2026-05-15T12:00:00+03:00" data-start="2025-09-01">
-      <div class="glow"></div>
-      <div class="card-top">
-        <div class="exam-name">AP Computer Science A</div>
-        <div class="exam-date">FRI, MAY 15 · 12:00 PM</div>
+      <div class="card-main">
+        <div class="glow"></div>
+        <div class="card-top">
+          <div class="exam-name">AP Computer Science A</div>
+          <div class="exam-date-badge">FRI, MAY 15 · 12:00 PM</div>
+        </div>
+        <div class="countdown">
+          <div class="unit"><div class="num" data-months>--</div><div class="label">Months</div></div>
+          <div class="unit"><div class="num" data-days>--</div><div class="label">Days</div></div>
+          <div class="unit"><div class="num" data-hours>--</div><div class="label">Hours</div></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+          <div class="progress-pct">--%</div>
+        </div>
+        <button class="toggle-btn" onclick="toggle(this)">
+          Exam Format <span class="arrow">↓</span>
+        </button>
       </div>
-      <div class="countdown">
-        <div class="unit"><div class="num" data-months>--</div><div class="label">Months</div></div>
-        <div class="unit"><div class="num" data-days>--</div><div class="label">Days</div></div>
-        <div class="unit"><div class="num" data-hours>--</div><div class="label">Hours</div></div>
-      </div>
-      <div class="progress-wrap">
-        <div class="progress-bar"><div class="progress-fill"></div></div>
-        <div class="progress-pct">--%</div>
+      <div class="format-panel">
+        <div class="format-inner">
+          <div class="sections-row">
+            <div class="section-block">
+              <div class="sh sh-mcq">Section I — MCQ</div>
+              <div class="meta">
+                <span><b>42</b> questions</span>
+                <span><b>90</b> min</span>
+                <span><b>55%</b> of score</span>
+              </div>
+              <div class="calc-note calc-no">N/A — Java Quick Ref in Bluebook</div>
+              <div class="q-rows">
+                <div class="q-row"><span class="qn">FORMAT</span><span>Individual questions + occasional 2-question sets. Trace code, predict output, OOP concepts.</span></div>
+              </div>
+            </div>
+            <div class="section-block">
+              <div class="sh sh-frq">Section II — FRQ</div>
+              <div class="meta">
+                <span><b>4</b> questions</span>
+                <span><b>90</b> min</span>
+                <span><b>45%</b> of score</span>
+              </div>
+              <div class="calc-note calc-no">Typed in Bluebook — not handwritten</div>
+              <div class="q-rows">
+                <div class="q-row"><span class="qn">NOTE</span><span>Java Quick Reference available. Partial credit per sub-part.</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="q-rows">
+            <div class="q-row"><span class="qn">Q1</span><span>Methods &amp; Control Structures — write 2 methods or 1 constructor + 1 method. Part A: loops/conditionals. Part B: must use String methods.</span></div>
+            <div class="q-row"><span class="qn">Q2</span><span>Class Design — design a full class from scratch: header, instance vars, constructor, method. Specs given as interaction table.</span></div>
+            <div class="q-row"><span class="qn">Q3</span><span>Data Analysis with ArrayList — ArrayList only (arrays removed from this question). Traversal, filtering, transformation.</span></div>
+            <div class="q-row"><span class="qn">Q4</span><span>Integrative — may involve 2D arrays, file I/O, or multi-class scenarios. (Inheritance no longer tested.)</span></div>
+          </div>
+          <div class="note-row">Fully digital — both MCQ and FRQ answered in Bluebook. Revised 2025-26 course: Units 1–10 consolidated to 4 units, Unit 9 inheritance removed.</div>
+        </div>
       </div>
     </div>
+
   </div>
 
   <div class="footer">
@@ -387,41 +721,46 @@
 </div>
 
 <script>
+  function toggle(btn) {
+    const panel = btn.closest('.card').querySelector('.format-panel');
+    const isOpen = panel.classList.contains('open');
+    panel.classList.toggle('open', !isOpen);
+    btn.classList.toggle('open', !isOpen);
+    btn.querySelector('span:last-child').textContent = isOpen ? '↓' : '↑';
+  }
+
   const cards = document.querySelectorAll('.card');
 
   function update() {
     const now = new Date();
-
     cards.forEach(card => {
       const target = new Date(card.dataset.target);
-      const start = new Date(card.dataset.start);
+      const start  = new Date(card.dataset.start);
       let diff = target - now;
 
       if (diff <= 0) {
         card.querySelector('[data-months]').textContent = '0';
-        card.querySelector('[data-days]').textContent = '0';
-        card.querySelector('[data-hours]').textContent = '0';
+        card.querySelector('[data-days]').textContent   = '0';
+        card.querySelector('[data-hours]').textContent  = '0';
         card.querySelector('.progress-fill').style.width = '100%';
-        card.querySelector('.progress-pct').textContent = '100%';
+        card.querySelector('.progress-pct').textContent  = '100%';
         return;
       }
 
-      // Calculate months + remaining
       const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
       const months = Math.floor(totalDays / 30);
-      const days = totalDays % 30;
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const days   = totalDays % 30;
+      const hours  = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
       card.querySelector('[data-months]').textContent = months;
-      card.querySelector('[data-days]').textContent = days;
-      card.querySelector('[data-hours]').textContent = hours;
+      card.querySelector('[data-days]').textContent   = days;
+      card.querySelector('[data-hours]').textContent  = hours;
 
-      // Progress: how much of the school year has elapsed
       const totalSpan = target - start;
-      const elapsed = now - start;
+      const elapsed   = now - start;
       const pct = Math.min(100, Math.max(0, (elapsed / totalSpan) * 100));
       card.querySelector('.progress-fill').style.width = pct.toFixed(1) + '%';
-      card.querySelector('.progress-pct').textContent = pct.toFixed(0) + '%';
+      card.querySelector('.progress-pct').textContent  = pct.toFixed(0) + '%';
     });
   }
 
